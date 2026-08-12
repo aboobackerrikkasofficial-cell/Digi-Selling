@@ -1357,7 +1357,7 @@
   </footer>
 
   
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <script>
     /* ==========================================
@@ -1370,11 +1370,26 @@
     const SUPABASE_PUBLISHABLE_KEY =
       "sb_publishable_Rv9bSbYMwzUIwABZ9AQEWw_QcpwFqHJ";
 
-    const supabase =
-      window.supabase.createClient(
+    let supabaseClient = null;
+
+    function getSupabaseClient(){
+      if(supabaseClient){
+        return supabaseClient;
+      }
+
+      if(!window.supabase || typeof window.supabase.createClient !== "function"){
+        throw new Error(
+          "Supabase library could not be loaded. Check your internet connection or hosting settings."
+        );
+      }
+
+      supabaseClient = window.supabase.createClient(
         SUPABASE_URL,
         SUPABASE_PUBLISHABLE_KEY
       );
+
+      return supabaseClient;
+    }
 
     /* ==========================================
        CONFIG
@@ -1644,7 +1659,7 @@
         }
 
         const { count, error: countError } =
-          await supabase
+          await getSupabaseClient()
             .from("products")
             .select("id", {
               count:"exact",
@@ -1687,7 +1702,7 @@
           }));
 
         const { error } =
-          await supabase
+          await getSupabaseClient()
             .from("products")
             .insert(rows);
 
@@ -1751,7 +1766,7 @@
         const {
           data,
           error
-        } = await supabase
+        } = await getSupabaseClient()
           .from("products")
           .select(
             "id,title,description,price,file_type,drive_link,password_hash,created_at,updated_at"
@@ -1806,7 +1821,7 @@
       const {
         data,
         error
-      } = await supabase
+      } = await getSupabaseClient()
         .from("products")
         .insert(row)
         .select()
@@ -1834,7 +1849,7 @@
       const {
         data,
         error
-      } = await supabase
+      } = await getSupabaseClient()
         .from("products")
         .update(row)
         .eq("id", id)
@@ -1856,7 +1871,7 @@
 
       const {
         error
-      } = await supabase
+      } = await getSupabaseClient()
         .from("products")
         .delete()
         .eq("id", id);
